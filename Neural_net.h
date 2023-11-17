@@ -24,7 +24,10 @@ public:
 	Neural_net(int in_INPUT_NEURONS, int in_HIDDEN_NEURONS, int in_OUTPUT_NEURONS, int in_HIDDEN_LAYERS);
 	void set_inputs(vector_1d& ins);
 	void set_expoutputs(vector_1d& expout);
-	vector_1d forward_propagation();
+	vector_1d forward_propagation_out();
+	void forward_propagation();
 	void back_propagation();
+	void save();
+	void load();
 };
 

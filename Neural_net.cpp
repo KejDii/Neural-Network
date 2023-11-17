@@ -1,8 +1,9 @@
 #include "Neural_net.h"
 #include <random>
+#include <fstream>
 
 float sigmoid_derivative(float x) {
-	return x * (1 - x);
+	return exp(x) / pow((exp(x) + 1), 2);
 }
 
 float sigmoid(float x) {
@@ -93,7 +94,7 @@ void Neural_net::set_expoutputs(vector_1d& expout) {
 	expected_outputs = expout;
 }
 
-vector_1d Neural_net::forward_propagation() {
+vector_1d Neural_net::forward_propagation_out() {
 	//inputs assignment
 	for (int i = 0; i < inputs.size(); i++) {
 		neural_network[0][i] = inputs[i];
@@ -133,6 +134,40 @@ vector_1d Neural_net::forward_propagation() {
 
 }
 
+void Neural_net::forward_propagation() {
+	//inputs assignment
+	for (int i = 0; i < inputs.size(); i++) {
+		neural_network[0][i] = inputs[i];
+	}
+
+	//res neurons
+	for (int i = 0; i < neural_network.size() - 1; i++) {
+		for (int j = 0; j < neural_network[i + 1].size(); j++) {
+			neural_network[i + 1][j] = 0;
+		}
+	}
+
+	//forward propagation
+	for (int i = 0; i < weights.size(); i++) {
+
+		for (int j = 0; j < weights[i].size(); j++) {
+
+			for (int k = 0; k < weights[i][j].size(); k++) {
+
+				neural_network[1 + i][j] += neural_network[i][k] * weights[i][j][k];
+
+			}
+
+			neural_network[i + 1][j] += biases[i][j];
+
+
+			neural_network[1 + i][j] = sigmoid(neural_network[1 + i][j]);
+
+		}
+
+	}
+}
+
 void Neural_net::back_propagation() {
 	//res errors
 	for (int i = 0; i < errors.size(); i++) {
@@ -151,7 +186,7 @@ void Neural_net::back_propagation() {
 
 	//main errors
 	for (int i = 0; i < errors[errors.size() - 1].size(); i++) {
-		errors[errors.size() - 1][i] = pow(neural_network[neural_network.size() - 1][i] - expected_outputs[i], 1);
+		errors[errors.size() - 1][i] = 2*pow(neural_network[neural_network.size() - 1][i] - expected_outputs[i], 1);
 	}
 
 	//errors in other layers
@@ -194,4 +229,40 @@ void Neural_net::back_propagation() {
 		}
 	}
 
+}
+
+void Neural_net::save() {
+	std::ofstream file("neural_network_save.txt");
+	for (int i = 0; i < weights.size(); i++) {
+		for (int j = 0; j < weights[i].size(); j++) {
+			for (int k = 0; k < weights[i][j].size(); k++) {
+				file << weights[i][j][k];
+			}
+		}
+	}
+	for (int i = 0; i < biases.size(); i++) {
+		for (int j = 0; j < biases[i].size(); j++) {
+			file << biases[i][j];
+		}
+	}
+
+
+	file.close();
+}
+
+void Neural_net::load() {
+	std::ifstream file("neural_network_save.txt");
+	for (int i = 0; i < weights.size(); i++) {
+		for (int j = 0; j < weights[i].size(); j++) {
+			for (int k = 0; k < weights[i][j].size(); k++) {
+				file >> weights[i][j][k];
+			}
+		}
+	}
+	for (int i = 0; i < biases.size(); i++) {
+		for (int j = 0; j < biases[i].size(); j++) {
+			file >> biases[i][j];
+		}
+	}
+	file.close();
 }
